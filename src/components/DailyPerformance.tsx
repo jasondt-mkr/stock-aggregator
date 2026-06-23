@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/utils/supabase";
 import { Loader2, Zap } from "lucide-react";
 import {
@@ -29,7 +29,7 @@ export default function DailyPerformance({ portfolioId, activeBroker }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const fetchSnapshots = async () => {
+  const fetchSnapshots = useCallback(async () => {
     if (!portfolioId) return;
     setIsLoading(true);
     try {
@@ -42,19 +42,20 @@ export default function DailyPerformance({ portfolioId, activeBroker }: Props) {
 
       if (error) throw error;
       setSnapshots(data || []);
-    } catch (err: any) {
-      if (err.code !== "42P01") {
+    } catch (err: unknown) {
+      const code = err instanceof Error ? (err as { code?: string }).code : null;
+      if (code !== "42P01") {
         // Ignore missing table error if they haven't run SQL yet
         console.error("Error fetching snapshots:", err);
       }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [portfolioId, activeBroker]);
 
   useEffect(() => {
     fetchSnapshots();
-  }, [portfolioId, activeBroker]);
+  }, [portfolioId, activeBroker, fetchSnapshots]);
 
   const handleGenerate = async () => {
     if (!portfolioId) return;
@@ -140,7 +141,7 @@ export default function DailyPerformance({ portfolioId, activeBroker }: Props) {
           ) : (
             <Zap size={14} />
           )}
-          Generate Today's Report
+          Generate Today&apos;s Report
         </button>
       </div>
 
@@ -170,6 +171,7 @@ export default function DailyPerformance({ portfolioId, activeBroker }: Props) {
                 <XAxis dataKey="date" hide />
                 <YAxis domain={["auto", "auto"]} hide />
                 <Tooltip
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any) => formatCurrency(value || 0)}
                   labelStyle={{
                     color: "#52525b",

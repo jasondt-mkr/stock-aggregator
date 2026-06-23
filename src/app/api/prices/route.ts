@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     const quotes = await yahooFinance.quote(queryTickers);
     
     // Yahoo finance returns an array if multiple, or a single object if one ticker
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quotesArray: any[] = Array.isArray(quotes) ? quotes : [quotes];
     
     quotesArray.forEach((quote) => {

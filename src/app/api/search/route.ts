@@ -16,7 +16,9 @@ export async function GET(request: Request) {
     
     // Filter strictly for Indonesian stocks (suffix .JK or exchange JKT)
     const idxStocks = results.quotes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((q: any) => q.symbol && (q.symbol.endsWith('.JK') || q.exchange === 'JKT'))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((q: any) => ({
         symbol: q.symbol.replace('.JK', ''),
         name: q.shortname || q.longname || q.symbol

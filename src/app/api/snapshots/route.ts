@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import YahooFinance from 'yahoo-finance2';
-import { processLedger, Holding, Transaction } from '@/utils/ledger';
+import { processLedger, Transaction } from '@/utils/ledger';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize a server-side Supabase client (using anon key since this is MVP and RLS is likely off/anon-allowed)
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     const uniqueTickers = Array.from(new Set(txs.map(t => t.ticker)));
     const queryTickers = uniqueTickers.map(t => `${t}.JK`);
     const quotes = await yahooFinance.quote(queryTickers);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quotesArray: any[] = Array.isArray(quotes) ? quotes : [quotes];
     
     const priceMap: Record<string, number> = {};
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
       return { totalInvested, currentValue, realizedPnl };
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const snapshotsToInsert: any[] = [];
     const todayDate = new Date().toISOString().split('T')[0];
 
@@ -114,8 +116,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, snapshots: snapshotsToInsert });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating snapshot:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

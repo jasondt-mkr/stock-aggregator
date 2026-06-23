@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Transaction, Holding, processLedger, applyLivePrices, TransactionType } from '@/utils/ledger';
+import { Transaction, processLedger, applyLivePrices, TransactionType } from '@/utils/ledger';
 import PortfolioOverview from '@/components/PortfolioOverview';
 import TransactionForm from '@/components/TransactionForm';
 import HoldingsTable from '@/components/HoldingsTable';
 import TransactionHistory from '@/components/TransactionHistory';
 import DailyPerformance from '@/components/DailyPerformance';
-import { LayoutDashboard, Wallet, RefreshCw, Plus } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const [portfolioId, setPortfolioId] = useState<string>('');
@@ -114,9 +114,10 @@ export default function Dashboard() {
           setActiveTab(tx.broker);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding transaction:', err);
-      throw new Error(err.message || 'Error saving transaction');
+      const msg = err instanceof Error ? err.message : 'Error saving transaction';
+      throw new Error(msg);
     } finally {
       setIsLoading(false);
     }

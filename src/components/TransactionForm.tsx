@@ -80,7 +80,7 @@ function AsyncTickerCombobox({ value, onChange }: { value: string, onChange: (v:
           {isSearching ? (
             <div className="px-3 py-2 text-sm text-zinc-500">Searching...</div>
           ) : results.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-zinc-500">No stocks found. Press enter to use "{search}" anyway.</div>
+            <div className="px-3 py-2 text-sm text-zinc-500">No stocks found. Press enter to use &quot;{search}&quot; anyway.</div>
           ) : (
             results.map((opt) => (
               <button
@@ -152,8 +152,9 @@ export default function TransactionForm({ onSubmit, isLoading, onClose }: Props)
         lots: numLots,
         price: numPrice
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to sync transaction.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to sync transaction.';
+      setError(msg);
     }
   };
 
